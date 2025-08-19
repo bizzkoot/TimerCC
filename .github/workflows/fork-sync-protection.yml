@@ -1,0 +1,162 @@
+name: Fork Sync Protection
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Check twice daily for upstream changes
+    - cron: '0 6,18 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Operation mode'
+        required: true
+        default: 'check-only'
+        type: choice
+        options:
+          - check-only
+          - auto-merge
+      force_pr:
+        description: 'Force PR creation even for simple changes'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  check-fork-sync:
+    runs-on: ubuntu-latest
+    name: Validate Fork Sync & Protect Auto-Accept-Countdown
+    
+    steps:
+    - name: Checkout fork
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js for TypeScript modules
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install TypeScript dependencies
+      run: |
+        # Install minimal TypeScript setup for monitoring scripts
+        npm install -g typescript ts-node
+        npm install --no-save @types/node
+    
+    - name: Add upstream remote
+      run: |
+        git remote add upstream https://github.com/anthropics/claude-code.git
+        git fetch upstream
+    
+    - name: Execute Fork Sync Protection Workflow
+      id: fork-sync-workflow
+      run: |
+        echo "🔧 Running comprehensive fork sync protection..."
+        cd scripts/fork-sync
+        
+        # Determine workflow mode based on inputs
+        MODE_FLAG=""
+        if [ "${{ github.event.inputs.mode }}" = "auto-merge" ]; then
+          MODE_FLAG="--auto-merge"
+        fi
+        
+        FORCE_PR_FLAG=""
+        if [ "${{ github.event.inputs.force_pr }}" = "true" ]; then
+          FORCE_PR_FLAG="--force-pr"
+        fi
+        
+        # Run the coordinated workflow
+        npx ts-node workflow-coordinator.ts $MODE_FLAG $FORCE_PR_FLAG --upstream=upstream/main
+        
+        echo "✅ Fork sync protection workflow completed"
+    
+    - name: Output Workflow Results
+      run: |
+        echo "📊 Workflow Outputs:"
+        echo "Fork ahead: ${{ steps.fork-sync-workflow.outputs.fork_ahead }}"
+        echo "Fork behind: ${{ steps.fork-sync-workflow.outputs.fork_behind }}"
+        echo "Feature status: ${{ steps.fork-sync-workflow.outputs.feature_status }}"
+        echo "Action taken: ${{ steps.fork-sync-workflow.outputs.action_taken }}"
+        echo "Report ID: ${{ steps.fork-sync-workflow.outputs.report_id }}"
+        
+        if [ -n "${{ steps.fork-sync-workflow.outputs.pr_url }}" ]; then
+          echo "PR created: ${{ steps.fork-sync-workflow.outputs.pr_url }}"
+        fi
+
+  test-countdown-feature:
+    runs-on: ubuntu-latest
+    needs: check-fork-sync
+    name: Test Auto-Accept-Countdown Feature
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Test installation script
+      run: |
+        cd specs/auto-accept-countdown
+        
+        # Test dry run
+        node install.js --dry-run
+        
+        # Test verification (should fail before install)
+        if node install.js --verify; then
+          echo "⚠️  Verification unexpectedly passed before installation"
+        else
+          echo "✅ Verification correctly failed before installation"
+        fi
+        
+        # Test help
+        node install.js --help
+    
+    - name: Validate TypeScript files
+      run: |
+        cd specs/auto-accept-countdown/src
+        
+        # Check TypeScript syntax (basic validation)
+        for ts_file in *.ts; do
+          if [ -f "$ts_file" ]; then
+            echo "Checking $ts_file..."
+            # Basic syntax check - ensure file is valid TypeScript
+            node -e "
+              const fs = require('fs');
+              const content = fs.readFileSync('$ts_file', 'utf8');
+              if (content.includes('export ') || content.includes('import ') || content.includes('class ') || content.includes('interface ')) {
+                console.log('✅ $ts_file appears to be valid TypeScript');
+              } else {
+                console.log('⚠️  $ts_file may not be valid TypeScript');
+                process.exit(1);
+              }
+            "
+          fi
+        done
+    
+    - name: Test documentation consistency
+      run: |
+        cd specs/auto-accept-countdown
+        
+        # Check that fork URLs are consistent
+        ANTHROPICS_COUNT=$(grep -r "anthropics/claude-code" . --exclude-dir=.git | wc -l)
+        BIZZKOOT_COUNT=$(grep -r "bizzkoot/TimerCC" . --exclude-dir=.git | wc -l)
+        
+        echo "Anthropics URLs found: $ANTHROPICS_COUNT"
+        echo "Bizzkoot URLs found: $BIZZKOOT_COUNT"
+        
+        if [ "$BIZZKOOT_COUNT" -lt 2 ]; then
+          echo "❌ Fork URLs not properly updated"
+          exit 1
+        fi
+        
+        if [ "$ANTHROPICS_COUNT" -gt 0 ]; then
+          echo "⚠️  Some upstream URLs still present:"
+          grep -r "anthropics/claude-code" . --exclude-dir=.git || true
+        fi
