@@ -32,12 +32,26 @@ Available in `.claude/commands/`:
 - **`/commit-push-pr`**: Automated git workflow for commits, push, and PR creation  
 - **`/dedupe`**: GitHub issue deduplication utilities
 
+### Installation
+
+**For Users:**
+```sh
+# Direct installation from repository
+curl -O https://raw.githubusercontent.com/bizzkoot/TimerCC/main/specs/auto-accept-countdown/install.js
+node install.js
+
+# Or clone and install
+git clone https://github.com/bizzkoot/TimerCC.git
+cd TimerCC/specs/auto-accept-countdown/
+node install.js
+```
+
 ### Development Commands (Local Only)
 
 For local development, additional Kiro workflow commands are available but not included in the repository to maintain minimal fork structure:
 
 - Kiro specification-driven development commands (kept locally)
-- Test files and installation scripts (kept locally)
+- Test files and build/verification scripts (kept locally)
 - Full development documentation (kept locally)
 
 ## Technical Architecture
@@ -54,10 +68,11 @@ For local development, additional Kiro workflow commands are available but not i
 - Core feature implementation in TypeScript
 - Essential command definitions
 - Complete specifications and documentation
+- Core installer script (install.js) for user installation
 
 **Local Development** (Not in Repository):
 - Comprehensive test suites
-- Installation and build scripts  
+- Build and verification scripts  
 - Kiro workflow development tools
 - Development documentation
 
@@ -73,6 +88,23 @@ Completed features are moved to `specs/done/` following Kiro convention:
 - Maintains project history
 - Keeps main workspace clean
 - Preserves implementation knowledge
+
+## Upstream Synchronization
+
+To keep TimerCC fork up to date with the main claude-code repository:
+
+**Steps to Sync with Upstream**:
+1. **Fetch upstream changes**: `git fetch upstream`
+2. **Check for new commits**: `git log --oneline upstream/main --not main`
+3. **Merge upstream changes**: `git merge upstream/main`
+4. **Push updated fork**: `git push origin main`
+
+**Initial Setup** (one-time only):
+```bash
+git remote add upstream https://github.com/anthropics/claude-code.git
+```
+
+**Note**: The minimal fork strategy ensures clean merges with minimal conflicts.
 
 ## Development Guidelines
 

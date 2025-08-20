@@ -29,13 +29,13 @@ Add a configurable safety buffer before each auto-accept action. Perfect for use
 **🚀 One-Command Installation:**
 ```sh
 # Download and run the installer
-curl -O https://raw.githubusercontent.com/anthropics/claude-code/main/specs/auto-accept-countdown/install.js
+curl -O https://raw.githubusercontent.com/bizzkoot/TimerCC/main/specs/auto-accept-countdown/install.js
 node install.js
 
-# Or build from source
-cd specs/auto-accept-countdown/
-node build-installer.js  # Creates standalone installer
-node auto-accept-countdown-installer.js
+# Or clone and install locally
+git clone https://github.com/bizzkoot/TimerCC.git
+cd TimerCC/specs/auto-accept-countdown/
+node install.js
 ```
 
 **✨ What you get:**
@@ -71,11 +71,11 @@ node auto-accept-countdown-installer.js
 | `node install.js --help` | Show detailed help |
 
 **📁 Manual Installation:**
-If you prefer manual setup, see [`specs/auto-accept-countdown/IMPLEMENTATION_COMPLETE.md`](specs/auto-accept-countdown/IMPLEMENTATION_COMPLETE.md) for detailed integration instructions.
+For manual integration into your Claude Code installation, see the source implementation in [`specs/auto-accept-countdown/src/`](specs/auto-accept-countdown/src/) directory.
 
 ## Reporting Bugs
 
-We welcome your feedback. Use the `/bug` command to report issues directly within Claude Code, or file a [GitHub issue](https://github.com/anthropics/claude-code/issues).
+We welcome your feedback. Use the `/bug` command to report issues directly within Claude Code, or file a [GitHub issue](https://github.com/bizzkoot/TimerCC/issues) for TimerCC-specific features.
 
 ## Data collection, usage, and retention
 

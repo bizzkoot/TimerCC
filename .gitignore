@@ -8,11 +8,11 @@
 specs/auto-accept-countdown/src/*.test.ts
 specs/*/src/*.test.ts
 
-# Installation and Build Scripts (local only)
-specs/auto-accept-countdown/install.js
+# Installation and Build Scripts (local only - except essential installer)
+# Allow core installer for user installation
+!specs/auto-accept-countdown/install.js
 specs/auto-accept-countdown/build-installer.js
 specs/auto-accept-countdown/verify-and-rollback.js
-specs/*/install.js
 specs/*/build*.js
 specs/*/verify*.js
 
