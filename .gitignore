@@ -1,0 +1,36 @@
+# TimerCC Fork - Local Development Files
+# Keep these files locally but don't commit to repository
+
+# Kiro Development Commands (local only)
+.claude/commands/kiro*.md
+
+# Test Files (local only) 
+specs/auto-accept-countdown/src/*.test.ts
+specs/*/src/*.test.ts
+
+# Installation and Build Scripts (local only)
+specs/auto-accept-countdown/install.js
+specs/auto-accept-countdown/build-installer.js
+specs/auto-accept-countdown/verify-and-rollback.js
+specs/*/install.js
+specs/*/build*.js
+specs/*/verify*.js
+
+# Development Documentation (local only)
+specs/auto-accept-countdown/INSTALLATION_GUIDE.md
+specs/auto-accept-countdown/PHASE*_SUMMARY.md
+specs/auto-accept-countdown/IMPLEMENTATION_COMPLETE.md
+specs/*/INSTALLATION_GUIDE.md
+specs/*/PHASE*_SUMMARY.md
+specs/*/IMPLEMENTATION_COMPLETE.md
+
+# Fork Sync Protection (problematic CI/CD)
+scripts/fork-sync/
+.github/workflows/fork-sync-protection.yml
+.github/fork-sync-protection.yml
+
+# Standard ignore patterns
+node_modules/
+*.log
+.DS_Store
+.env
